@@ -26,18 +26,8 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { username, password } = createUserDto;
-
-    const existingUser = await this.userRepository.findOne({
-      where: { username },
-    });
-    if (existingUser) {
-      throw new NotFoundException('Username already exists');
-    }
-
-    const newUser = this.userRepository.create({ username, password });
-    return await this.userRepository.save(newUser);
+  async findOneByUsername(username: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { username } });
   }
 
   async findAllUser(): Promise<User[]> {

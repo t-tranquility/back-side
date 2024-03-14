@@ -1,37 +1,23 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Patch,
   Param,
   Delete,
+  Post,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('data')
-  async createUserData(@Body('username') username: string): Promise<string> {
-    try {
-      await this.userService.createUser({
-        username,
-        password: '',
-      });
-      return 'User data saved successfully';
-    } catch (error) {
-      console.error('Error saving user data:', error.message);
-      throw new Error('Failed to save user data');
-    }
-  }
-
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.createUser(createUserDto);
+    return this.userService.signUp(createUserDto);
   }
 
   @Get()
