@@ -9,6 +9,10 @@ import { SunsModule } from './suns/suns.module';
 import { BankQuestionsModule } from './bank-questions/bank-questions.module';
 import { BankQuestion } from './bank-questions/entities/bank-question.entity';
 import * as dotenv from 'dotenv';
+import { rootConfigOptions } from './configs/app.config';
+import { ConfigModule } from '@nestjs/config';
+import { JwtConfigService } from './configs/jwt-config.service';
+import { JwtModule } from '@nestjs/jwt';
 dotenv.config();
 
 @Module({
@@ -28,23 +32,16 @@ dotenv.config();
     AuthModule,
     SunsModule,
     BankQuestionsModule,
+    JwtModule.registerAsync({ useClass: JwtConfigService }),
+    ConfigModule.forRoot(rootConfigOptions),
   ],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, AuthMiddleware],
 })
 export class AppModule {
   public configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(AuthMiddleware)
-      .exclude(
-        { path: 'auth/login', method: RequestMethod.POST },
-        { path: 'auth/signup', method: RequestMethod.POST },
-        { path: 'bank-questions', method: RequestMethod.POST },
-        { path: 'bank-questions/submit-answers', method: RequestMethod.POST },
-        { path: 'bank-questions', method: RequestMethod.GET },
-        { path: 'bank-questions', method: RequestMethod.PATCH },
-        { path: 'bank-questions', method: RequestMethod.DELETE },
-      )
       .forRoutes({ method: RequestMethod.ALL, path: '*' });
   }
 }

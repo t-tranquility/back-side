@@ -1,47 +1,41 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Response, NextFunction, Request as ExpressRequest } from 'express';
-import * as jwt from 'jsonwebtoken';
-import { UserService } from '../../user/user.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../../user/entities/user.entity';
+import { AppConfig } from 'src/configs/app.config';
 
-interface JwtPayload {
-  username: string;
-}
 export interface RequestWithUser extends ExpressRequest {
   user: User;
 }
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService<AppConfig>,
+  ) {}
 
   async use(req: RequestWithUser, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
+    console.log(authHeader);
+    const token = authHeader && authHeader.split(' ')[1];
 
-    if (!authHeader) {
-      return res
-        .status(401)
-        .json({ message: 'Authorization header is missing.' });
-    }
-
-    const [bearer, token] = authHeader.split(' ');
-
-    if (bearer !== 'Bearer' || !token) {
-      return res.status(401).json({ message: 'Invalid authorization header.' });
+    if (!authHeader || !token) {
+      req.user = null;
+      return next();
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
-      const user = await this.userService.findOneByUsername(decoded.username);
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
+      });
 
-      if (!user) {
-        return res.status(401).json({ message: 'User not found.' });
-      }
-
-      req.user = user;
+      req.user = payload;
       next();
     } catch (error) {
-      return res.status(401).json({ message: 'Invalid token.' });
+      req.user = null;
     }
+    next();
   }
 }

@@ -50,7 +50,7 @@ export class BankQuestionsService {
   async submitAnswers(userAnswers: UserAnswerDto[]): Promise<void> {
     const questions = await this.findAll();
     let score = 0;
-
+    // через фильтр и без переменной снаружм
     userAnswers.forEach((userAnswer) => {
       const question = questions.find((q) => q.id === userAnswer.questionId);
 
