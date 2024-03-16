@@ -13,6 +13,7 @@ import { rootConfigOptions } from './configs/app.config';
 import { ConfigModule } from '@nestjs/config';
 import { JwtConfigService } from './configs/jwt-config.service';
 import { JwtModule } from '@nestjs/jwt';
+import { TheoryModule } from './theory/theory.module';
 dotenv.config();
 
 @Module({
@@ -34,6 +35,7 @@ dotenv.config();
     BankQuestionsModule,
     JwtModule.registerAsync({ useClass: JwtConfigService }),
     ConfigModule.forRoot(rootConfigOptions),
+    TheoryModule,
   ],
   controllers: [UserController],
   providers: [UserService, AuthMiddleware],
