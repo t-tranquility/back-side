@@ -10,7 +10,7 @@ export class JwtConfigService implements JwtOptionsFactory {
 
   public createJwtOptions(): JwtModuleOptions {
     return {
-      secret: this.configService.get<string>('JWT_SECRET'),
+      secret: process.env.JWT_SECRET,
     };
   }
 }

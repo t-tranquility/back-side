@@ -36,8 +36,23 @@ export class AuthService {
     }
 
     const payload = { sub: user.id, username: user.username };
+    console.log('payload', payload);
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async getUserByAccessToken(access_token: string): Promise<User> {
+    try {
+      const payload = await this.jwtService.verify(access_token, {
+        secret: process.env.JWT_SECRET,
+      });
+      console.log('gev', payload);
+      const user = await this.usersService.findOne(payload.username);
+      return user;
+    } catch (error) {
+      console.log('error', error);
+      throw new Error('Invalid access token хехехе');
+    }
   }
 }
